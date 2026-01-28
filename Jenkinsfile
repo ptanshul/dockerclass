@@ -7,9 +7,9 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                echo "Code already checked out by Jenkins"
+                echo "Files in workspace:"
                 sh 'ls -l'
             }
         }
@@ -17,13 +17,16 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Building Docker image"
-                sh "docker build -t ${IMAGE_NAME}:latest ."
+                sh '''
+                  docker version
+                  docker info
+                  docker build --progress=plain -t ${IMAGE_NAME}:latest .
+                '''
             }
         }
 
-        stage('Verify Docker Image') {
+        stage('Verify Image') {
             steps {
-                echo "Verifying Docker image"
                 sh "docker images | grep ${IMAGE_NAME}"
             }
         }
@@ -31,10 +34,10 @@ pipeline {
 
     post {
         success {
-            echo "Docker image built successfully 🎉"
+            echo "Docker image built successfully ✅"
         }
         failure {
-            echo "Docker build failed ❌"
+            echo "Docker image build failed ❌"
         }
     }
 }
