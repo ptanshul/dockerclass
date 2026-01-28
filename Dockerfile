@@ -1,3 +1,7 @@
 FROM nginx:alpine
 
-COPY index.html /usr/share/nginx/html/index.html
+# Copy static website content
+COPY index.html /usr/share/nginx/html/
+
+# Document the port NGINX listens on
+EXPOSE 80
