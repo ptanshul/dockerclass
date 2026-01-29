@@ -3,16 +3,15 @@ pipeline {
 
     environment {
         AWS_REGION = "us-east-1"
-        AWS_ACCOUNT_ID = "779846806653"
-        ECR_REPO = "779846806653.dkr.ecr.us-east-1.amazonaws.com/nginx-static-site"
+        ECR_REPO   = "779846806653.dkr.ecr.us-east-1.amazonaws.com/nginx-static-site"
         IMAGE_NAME = "nginx-static-site"
-        IMAGE_TAG = "latest"
+        IMAGE_TAG  = "latest"
         EKS_CLUSTER = "my-eks-cluster"
     }
 
     stages {
 
-        stage('Checkout Source Code') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
@@ -28,15 +27,11 @@ pipeline {
 
         stage('Login to AWS ECR') {
             steps {
-                withCredentials([[
-                  $class: 'AmazonWebServicesCredentialsBinding',
-                  credentialsId: 'aws-ecr'
-                ]]) {
-                    sh '''
-                      aws ecr get-login-password --region ${AWS_REGION} \
-                      | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                    '''
-                }
+                sh '''
+                  aws ecr get-login-password --region ${AWS_REGION} \
+                  | docker login --username AWS --password-stdin \
+                  779846806653.dkr.ecr.${AWS_REGION}.amazonaws.com
+                '''
             }
         }
 
@@ -51,26 +46,21 @@ pipeline {
 
         stage('Deploy to EKS') {
             steps {
-                withCredentials([[
-                  $class: 'AmazonWebServicesCredentialsBinding',
-                  credentialsId: 'aws-ecr'
-                ]]) {
-                    sh '''
-                      aws eks update-kubeconfig \
-                        --region ${AWS_REGION} \
-                        --name ${EKS_CLUSTER}
+                sh '''
+                  aws eks update-kubeconfig \
+                    --region ${AWS_REGION} \
+                    --name ${EKS_CLUSTER}
 
-                      kubectl apply -f deployment.yaml
-                      kubectl apply -f service.yaml
-                    '''
-                }
+                  kubectl apply -f deployment.yaml
+                  kubectl apply -f service.yaml
+                '''
             }
         }
     }
 
     post {
         success {
-            echo "✅ Build, Push to ECR, and Deploy to EKS completed successfully"
+            echo "✅ Image pushed to ECR and deployed to EKS successfully"
         }
         failure {
             echo "❌ Pipeline failed"
