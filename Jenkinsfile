@@ -2,12 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/ptanshul/dockerclass.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh '''
