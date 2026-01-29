@@ -13,7 +13,7 @@ pipeline {
                 sh '''
                 pwd
                 ls -l
-                docker build -f Dockerfile -t nginx-static-site .
+                DOCKER_BUILDKIT=0 docker build -f Dockerfile -t nginx-static-site .
                 '''
             }
         }
