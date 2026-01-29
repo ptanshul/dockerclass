@@ -9,7 +9,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -18,17 +17,38 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh """
+                sh '''
                   docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                """
+                '''
             }
         }
 
         stage('Login to AWS ECR') {
             steps {
-                sh """
+                sh '''
                   aws ecr get-login-password --region ${AWS_REGION} \
                   | docker login --username AWS --password-stdin \
                   779846806653.dkr.ecr.${AWS_REGION}.amazonaws.com
-                """
+                '''
             }
+        }
+
+        stage('Tag & Push Image to ECR') {
+            steps {
+                sh '''
+                  docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${ECR_REPO}:${IMAGE_TAG}
+                  docker push ${ECR_REPO}:${IMAGE_TAG}
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Docker image pushed to ECR successfully'
+        }
+        failure {
+            echo 'ECR push failed'
+        }
+    }
+}
