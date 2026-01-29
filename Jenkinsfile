@@ -10,7 +10,11 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t nginx-static-site .'
+                sh '''
+                pwd
+                ls -l
+                docker build -t nginx-static-site .
+                '''
             }
         }
 
