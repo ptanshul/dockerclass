@@ -4,20 +4,10 @@ pipeline {
     stages {
         stage('Build Docker Image') {
             steps {
+                // We stay inside the Jenkins workspace (.), no moving to /tmp
                 sh '''
-                set -e
-
-                echo "Preparing Docker build context in /tmp"
-                rm -rf /tmp/docker-build
-                mkdir -p /tmp/docker-build
-
-                cp Dockerfile index.html /tmp/docker-build/
-                cd /tmp/docker-build
-
-                echo "Files in build context:"
-                ls -l
-
-                DOCKER_BUILDKIT=0 docker build -t nginx-static-site .
+                echo "Building Docker image in the current workspace..."
+                docker build -t nginx-static-site .
                 '''
             }
         }
@@ -25,6 +15,7 @@ pipeline {
         stage('Run NGINX Container') {
             steps {
                 sh '''
+                echo "Cleaning up old containers and starting new one..."
                 docker rm -f nginx-site || true
                 docker run -d -p 8081:80 --name nginx-site nginx-static-site
                 '''
