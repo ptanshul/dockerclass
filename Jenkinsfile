@@ -6,7 +6,7 @@ pipeline {
         ECR_REPO   = "779846806653.dkr.ecr.us-east-1.amazonaws.com/nginx-static-site"
         IMAGE_NAME = "nginx-static-site"
         IMAGE_TAG  = "latest"
-        EKS_CLUSTER = "YOUR_EKS_CLUSTER_NAME"
+        EKS_CLUSTER = "my-eks-cluster"
     }
 
     stages {
