@@ -5,9 +5,19 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                pwd
+                set -e
+
+                echo "Preparing Docker build context in /tmp"
+                rm -rf /tmp/docker-build
+                mkdir -p /tmp/docker-build
+
+                cp Dockerfile index.html /tmp/docker-build/
+                cd /tmp/docker-build
+
+                echo "Files in build context:"
                 ls -l
-                DOCKER_BUILDKIT=0 docker build -f Dockerfile -t nginx-static-site .
+
+                DOCKER_BUILDKIT=0 docker build -t nginx-static-site .
                 '''
             }
         }
