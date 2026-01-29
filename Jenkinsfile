@@ -15,3 +15,20 @@ pipeline {
                 checkout scm
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                sh """
+                  docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                """
+            }
+        }
+
+        stage('Login to AWS ECR') {
+            steps {
+                sh """
+                  aws ecr get-login-password --region ${AWS_REGION} \
+                  | docker login --username AWS --password-stdin \
+                  779846806653.dkr.ecr.${AWS_REGION}.amazonaws.com
+                """
+            }
