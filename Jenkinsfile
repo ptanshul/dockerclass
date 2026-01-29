@@ -6,9 +6,11 @@ pipeline {
         ECR_REPO   = "779846806653.dkr.ecr.us-east-1.amazonaws.com/nginx-static-site"
         IMAGE_NAME = "nginx-static-site"
         IMAGE_TAG  = "latest"
+        EKS_CLUSTER = "YOUR_EKS_CLUSTER_NAME"
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -41,14 +43,27 @@ pipeline {
                 '''
             }
         }
+
+        stage('Deploy to EKS') {
+            steps {
+                sh '''
+                  aws eks update-kubeconfig \
+                    --region ${AWS_REGION} \
+                    --name ${EKS_CLUSTER}
+
+                  kubectl apply -f deployment.yaml
+                  kubectl apply -f service.yaml
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo 'Docker image pushed to ECR successfully'
+            echo '✅ Image pushed to ECR and deployed to EKS successfully'
         }
         failure {
-            echo 'ECR push failed'
+            echo '❌ Deployment failed'
         }
     }
 }
