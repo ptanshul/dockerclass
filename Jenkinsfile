@@ -4,12 +4,16 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                echo "Current Directory: $(pwd)"
-                echo "Listing all files in workspace:"
-                ls -la
-                
-                # We try to build. If it fails, the 'ls' above will tell us why.
+                # Create a visible directory (Snap can't see hidden .jenkins folder)
+                mkdir -p /home/jenkins/docker-build
+                cp Dockerfile index.html /home/jenkins/docker-build/
+        
+                # Build from the visible directory
+                cd /home/jenkins/docker-build
                 docker build -t nginx-static-site .
+        
+                # Clean up
+                rm -rf /home/jenkins/docker-build
                 '''
             }
         }
